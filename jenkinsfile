@@ -1,24 +1,31 @@
 pipeline {
     agent any
 
+    environment {
+        FLASK_APP = "app.py"
+    }
+
     stages {
-        stage('Clone Repository') {
+        stage('Checkout Code') {
             steps {
-                git 'https://github.com/chiruchiragg/flask-docker-demo.git'
+                git branch: 'main', url: 'https://github.com/chiruchiragg/flask-docker-demo.git'
             }
         }
-        stage('Build Docker Image') {
+
+        stage('Install Dependencies') {
             steps {
                 dir('dockerdemo1/app') {
-                    sh 'docker build -t flask-app .'
+                    sh 'python -m pip install -r requirements.txt'
                 }
             }
         }
+
         stage('Run Flask App') {
             steps {
-                sh 'docker run -d -p 5000:5000 flask-app'
+                dir('dockerdemo1/app') {
+                    sh 'nohup python app.py &'
+                }
             }
         }
     }
 }
-
